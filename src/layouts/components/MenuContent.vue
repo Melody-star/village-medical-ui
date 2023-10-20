@@ -46,7 +46,7 @@ import Vue, { PropType } from 'vue';
 import { prefix } from '@/config/global';
 import { MenuRoute } from '@/interface';
 
-const getMenuList = (list: MenuRoute[], basePath?: string): MenuRoute[] => {
+const getMenuList = (list: MenuRoute[], basePath?: string): MenuRoute[] => {  
   if (!list) {
     return [];
   }

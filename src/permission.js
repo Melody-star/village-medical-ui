@@ -24,24 +24,13 @@ router.beforeEach(async (to, from, next) => {
     }
 
     const roles = store.getters['user/roles'];
-    console.log("roles",roles);
 
     if (roles && roles.length > 0) {
       next();
-      console.log("有权限");
     } else {
-      try {
-        console.log("获取用户权限");
-        await store.dispatch('user/getUserInfo');
-
-        await store.dispatch('permission/initRoutes', store.getters['user/roles']);
-
-        next({ ...to });
-      } catch (error) {
-        await store.commit('user/removeToken');
-        next(`/login?redirect=${to.path}`);
-        NProgress.done();
-      }
+      await store.dispatch('user/getUserInfo');
+      await store.dispatch('permission/initRoutes', store.getters['user/roles'])
+      next({ ...to });
     }
   } else {
     /* white list router */

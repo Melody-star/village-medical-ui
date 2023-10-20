@@ -53,6 +53,7 @@ import { UserIcon, LockOnIcon, BrowseOffIcon, BrowseIcon, RefreshIcon } from 'td
 import { onMounted } from 'tdesign-vue/es/tree/adapt';
 import { getSelftItemList } from '@/pages/dashboard/base';
 import store from '@/store';
+import { USER_INFO_LIST } from '@/service/service-user';
 
 const INITIAL_DATA = {
   phone: '',
@@ -108,17 +109,15 @@ export default Vue.extend({
     },
     async onSubmit({ validateResult }) {
       if (validateResult === true) {
-        const res = await this.$request.post('/auth/login', {
-          username: this.formData.account,
-          password: this.formData.password,
-        });
+        await this.$store.dispatch('user/login', this.formData);
 
+        // 记住密码
         localStorage.setItem('isSaveAccount', this.isSaveAccount);
         if (this.isSaveAccount) {
           localStorage.setItem('username', this.formData.account);
           localStorage.setItem('password', btoa(this.formData.password));
         }
-        this.$store.commit('user/setToken', res.authorization);
+
         this.$message.success('登录成功');
         this.$router.replace('/').catch(() => '');
       }

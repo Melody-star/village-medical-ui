@@ -2,6 +2,7 @@ import { resetRouter, asyncRouterList } from '@/router';
 
 function filterPermissionsRouters(routes, roles) {
   const res = [];
+  
   routes.forEach((route) => {
     const children = [];
     route.children?.forEach((childRouter) => {
@@ -37,7 +38,7 @@ const getters = {
 const actions = {
   async initRoutes({ commit }, roles) {
     let accessedRouters;
-
+    
     // special token
     if (roles.includes('ALL_ROUTERS')) {
       accessedRouters = asyncRouterList;
