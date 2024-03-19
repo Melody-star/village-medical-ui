@@ -21,16 +21,6 @@
           <!-- 全局通知 -->
           <notice />
 
-          <t-tooltip placement="bottom" content="代码仓库">
-            <t-button theme="default" shape="square" variant="text" @click="navToGitHub">
-              <logo-github-icon />
-            </t-button>
-          </t-tooltip>
-          <t-tooltip placement="bottom" content="帮助文档">
-            <t-button theme="default" shape="square" variant="text" @click="navToHelper">
-              <help-circle-icon />
-            </t-button>
-          </t-tooltip>
           <t-dropdown :min-column-width="125" trigger="click">
             <template #dropdown>
               <t-dropdown-menu>
@@ -46,7 +36,7 @@
               <template #icon>
                 <user-circle-icon class="header-user-avatar" />
               </template>
-              <div class="header-user-account">Tencent</div>
+              <div class="header-user-account">{{ username }}</div>
               <template #suffix>
                 <chevron-down-icon />
               </template>
@@ -80,6 +70,8 @@ import LogoFull from '@/assets/assets-logo-full.svg';
 import Notice from './Notice.vue';
 import Search from './Search.vue';
 import MenuContent from './MenuContent.vue';
+
+import store from '@/store';
 
 export default Vue.extend({
   components: {
@@ -121,11 +113,15 @@ export default Vue.extend({
       default: 3,
     },
   },
+  mounted(){
+    this.username = this.$store.state.user.userInfo.username
+  },
   data() {
     return {
       prefix,
       visibleNotice: false,
       isSearchFocus: false,
+      username:""
     };
   },
   computed: {

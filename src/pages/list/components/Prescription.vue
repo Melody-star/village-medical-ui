@@ -13,13 +13,8 @@
         <t-col :span="10">
           <t-row :gutter="[16, 24]">
             <t-col>
-              <t-form-item label="用户ID" name="status">
-                <t-input
-                  v-model="formData.userId"
-                  class="form-item-content`"
-                  type="search"
-                  placeholder="请输入用户ID"
-                />
+              <t-form-item label="处方ID" name="status">
+                <t-input v-model="formData.id" class="form-item-content`" type="search" placeholder="请输入处方ID" />
               </t-form-item>
             </t-col>
             <t-col>
@@ -37,7 +32,6 @@
         </t-col>
 
         <t-col :span="2" class="operation-container">
-          <t-button theme="primary" @click="addUser">添加</t-button>
           <t-button theme="primary" type="submit" :style="{ marginLeft: '8px' }" @click="query"> 查询 </t-button>
           <t-button type="reset" variant="base" theme="default"> 重置 </t-button>
         </t-col>
@@ -56,25 +50,16 @@
         :loading="dataLoading"
         :headerAffixedTop="true"
       >
-        <template #user_type="{ row }">
-          {{ row.user_type === 0 ? '用户' : '医院管理员' }}
-        </template>
-        <template #avatar="{ row }">
-          <t-image :src="row.avatar" fit="cover" :style="{ width: '60px', height: '60px' }" />
+        <template #prescription_link="{ row }">
+          <t-image :src="row.prescription_link" fit="cover" :style="{ width: '200px', height: '200px' }" />
         </template>
         <template #op="slotProps">
           <a class="t-button-link" @click="rehandleClickOp(slotProps)">编辑</a>
-          <a
-            class="t-button-link"
-            @click="handleClickPower(slotProps)"
-           
-            >权限</a
-          >
           <a class="t-button-link" @click="handleClickDelete(slotProps)">删除</a>
         </template>
       </t-table>
       <t-dialog
-        header="确认删除当前所选项？"
+        header="确认删除当前所选合同？"
         :body="confirmBody"
         :visible.sync="confirmVisible"
         @confirm="onConfirmDelete"
@@ -82,17 +67,11 @@
       >
       </t-dialog>
     </div>
-
-    <!-- 权限选择 -->
-    <t-dialog :visible.sync="visible" width="550px" header="权限配置" @confirm="confirm">
-      <t-transfer :data="list" v-model="targetValue" />
-    </t-dialog>
   </div>
 </template>
 <script>
 import { prefix } from '@/config/global';
 import Trend from '@/components/trend/index.vue';
-import { getUserInfoByType } from '@/api/home';
 
 import {
   CONTRACT_STATUS,
@@ -125,49 +104,24 @@ export default {
       value: 'first',
       columns: [
         {
-          title: '用户ID',
+          title: '处方ID',
           fixed: 'left',
-          width: 150,
+          width: 50,
           align: 'center',
           ellipsis: true,
-          colKey: 'user_id',
-        },
-        {
-          title: '账号',
-          width: 200,
-          ellipsis: true,
-          colKey: 'account',
-        },
-        {
-          title: '用户类型',
-          width: 200,
-          ellipsis: true,
-          colKey: 'user_type',
-        },
-        {
-          title: '头像',
-          width: 200,
-          ellipsis: true,
-          colKey: 'avatar',
+          colKey: 'prescription_id',
         },
         {
           title: '用户名',
-          width: 200,
+          width: 100,
           ellipsis: true,
-          colKey: 'username',
+          colKey: 'user.username',
         },
         {
-          title: 'openid',
-          width: 200,
+          title: '处方',
+          width: 100,
           ellipsis: true,
-          colKey: 'openid',
-        },
-        {
-          align: 'left',
-          fixed: 'right',
-          width: 200,
-          colKey: 'op',
-          title: '操作',
+          colKey: 'prescription_link',
         },
       ],
       rowKey: 'index',
@@ -184,11 +138,6 @@ export default {
       },
       confirmVisible: false,
       deleteIdx: -1,
-      list: [],
-      targetValue: [],
-      visible: false,
-      selectUserId: null,
-      roles: [],
     };
   },
   computed: {
@@ -206,13 +155,11 @@ export default {
   mounted() {
     this.dataLoading = true;
     this.initData();
-    // this.roles = this.$store.getters['user/roles'];
   },
   methods: {
     initData() {
-      getUserInfoByType({
-        type: 4,
-      })
+      this.$request
+        .get('prescription')
         .then((res) => {
           this.data = res;
           this.pagination = {
@@ -220,28 +167,12 @@ export default {
             total: this.data.length,
           };
         })
+        .catch((e) => {
+          console.log(e);
+        })
         .finally(() => {
           this.dataLoading = false;
         });
-
-      // this.$request
-      //   .get('/user/getUserInfoByType?type=4')
-      //   .then((res) => {
-
-      //     console.log(res);
-
-      //     // this.data = res;
-      //     // this.pagination = {
-      //     //   ...this.pagination,
-      //     //   total: this.data.length,
-      //     // };
-      //   })
-      //   .catch((e) => {
-      //     console.log(e);
-      //   })
-      //   .finally(() => {
-      //     this.dataLoading = false;
-      //   });
     },
     getContainer() {
       return document.querySelector('.tdesign-starter-layout');
@@ -290,59 +221,13 @@ export default {
       this.deleteIdx = -1;
     },
     query() {
-      this.dataLoading = true;
-      this.$request
-        .get('user/' + this.formData.userId)
-        .then((res) => {
-          this.data = [];
-          this.data.push(res);
-        })
-        .catch((e) => {
-          console.log(e);
-        })
-        .finally(() => {
-          this.dataLoading = false;
-        });
-    },
-    addUser() {
-      this.$router.push('/user/formEdit');
-    },
-
-    /**
-     * 点击权限按钮
-     */
-    async handleClickPower(item) {
-      this.visible = true;
-      const allPermission = await this.$request.get('/permission');
-      const owerPermission = await this.$request.get('/permission/getPermissionByUserId?userId=' + item.row.user_id);
-
-      this.selectUserId = item.row.user_id;
-
-      this.list = [];
-      for (let item of allPermission) {
-        this.list.push({
-          label: item.describe,
-          value: item.name,
-        });
-      }
-
-      this.targetValue = [];
-      for (let item of owerPermission) {
-        this.targetValue.push(item.name);
-      }
-    },
-
-    /**
-     * 确定选择权限（修改用户权限）
-     */
-    async confirm() {
-      const res = await this.$request.patch('/permission/' + this.selectUserId, {
-        list: this.targetValue,
+      this.$request.get('/prescription/getPrescriptionById?id=' + this.formData.id).then((res) => {
+        this.data = res;
+        this.pagination = {
+          ...this.pagination,
+          total: this.data.length,
+        };
       });
-      if (res == '修改成功') {
-        this.$message.success('修改成功');
-        this.visible = false;
-      }
     },
   },
 };

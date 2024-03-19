@@ -35,7 +35,7 @@ VueRouter.prototype.replace = function replace(location) {
 
 Vue.config.productionTip = false;
 sync(store, router);
-new Vue({
+let vue = new Vue({
   router,
   store,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -49,3 +49,5 @@ new Vue({
     </div>
   ),
 }).$mount('#app');
+
+export default vue

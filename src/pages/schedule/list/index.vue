@@ -12,27 +12,27 @@
       <t-row>
         <t-col :span="10">
           <t-row :gutter="[16, 24]">
-            <t-col>
-              <t-form-item label="用户ID" name="status">
+            <!-- <t-col>
+              <t-form-item label="医院ID" name="status">
                 <t-input
                   v-model="formData.userId"
                   class="form-item-content`"
                   type="search"
-                  placeholder="请输入用户ID"
+                  placeholder="请输入医院ID"
                 />
               </t-form-item>
             </t-col>
             <t-col>
-              <t-form-item label="用户名" name="username">
+              <t-form-item label="医院名称" name="username">
                 <t-input
                   v-model="formData.username"
                   class="form-item-content"
                   type="search"
-                  placeholder="请输入用户名"
+                  placeholder="请输入医院名称"
                   :style="{ minWidth: '134px' }"
                 />
               </t-form-item>
-            </t-col>
+            </t-col> -->
           </t-row>
         </t-col>
 
@@ -56,20 +56,11 @@
         :loading="dataLoading"
         :headerAffixedTop="true"
       >
-        <template #user_type="{ row }">
-          {{ row.user_type === 0 ? '用户' : '医院管理员' }}
-        </template>
-        <template #avatar="{ row }">
-          <t-image :src="row.avatar" fit="cover" :style="{ width: '60px', height: '60px' }" />
+        <template #hospital_image="{ row }">
+          <t-image :src="row.hospital_image" fit="cover" :style="{ width: '60px', height: '60px' }" />
         </template>
         <template #op="slotProps">
           <a class="t-button-link" @click="rehandleClickOp(slotProps)">编辑</a>
-          <a
-            class="t-button-link"
-            @click="handleClickPower(slotProps)"
-           
-            >权限</a
-          >
           <a class="t-button-link" @click="handleClickDelete(slotProps)">删除</a>
         </template>
       </t-table>
@@ -82,17 +73,12 @@
       >
       </t-dialog>
     </div>
-
-    <!-- 权限选择 -->
-    <t-dialog :visible.sync="visible" width="550px" header="权限配置" @confirm="confirm">
-      <t-transfer :data="list" v-model="targetValue" />
-    </t-dialog>
   </div>
 </template>
 <script>
 import { prefix } from '@/config/global';
 import Trend from '@/components/trend/index.vue';
-import { getUserInfoByType } from '@/api/home';
+import { getScheduleList } from '@/api/home';
 
 import {
   CONTRACT_STATUS,
@@ -120,54 +106,33 @@ export default {
         // no: undefined,
         // status: undefined,
       },
+
+      // 表格数据
       data: [],
       dataLoading: false,
       value: 'first',
+
+      // 表格头
       columns: [
         {
-          title: '用户ID',
+          title: 'ID',
           fixed: 'left',
           width: 150,
           align: 'center',
           ellipsis: true,
-          colKey: 'user_id',
+          colKey: 'schedule_id',
         },
         {
-          title: '账号',
+          title: '日期',
           width: 200,
           ellipsis: true,
-          colKey: 'account',
+          colKey: 'date',
         },
         {
-          title: '用户类型',
+          title: '医生',
           width: 200,
           ellipsis: true,
-          colKey: 'user_type',
-        },
-        {
-          title: '头像',
-          width: 200,
-          ellipsis: true,
-          colKey: 'avatar',
-        },
-        {
-          title: '用户名',
-          width: 200,
-          ellipsis: true,
-          colKey: 'username',
-        },
-        {
-          title: 'openid',
-          width: 200,
-          ellipsis: true,
-          colKey: 'openid',
-        },
-        {
-          align: 'left',
-          fixed: 'right',
-          width: 200,
-          colKey: 'op',
-          title: '操作',
+          colKey: 'user.username',
         },
       ],
       rowKey: 'index',
@@ -206,13 +171,14 @@ export default {
   mounted() {
     this.dataLoading = true;
     this.initData();
-    // this.roles = this.$store.getters['user/roles'];
+    this.roles = this.$store.getters['user/roles'];
   },
   methods: {
+    /**
+     * 获取列表数据
+     */
     initData() {
-      getUserInfoByType({
-        type: 4,
-      })
+      getScheduleList()
         .then((res) => {
           this.data = res;
           this.pagination = {
@@ -223,25 +189,6 @@ export default {
         .finally(() => {
           this.dataLoading = false;
         });
-
-      // this.$request
-      //   .get('/user/getUserInfoByType?type=4')
-      //   .then((res) => {
-
-      //     console.log(res);
-
-      //     // this.data = res;
-      //     // this.pagination = {
-      //     //   ...this.pagination,
-      //     //   total: this.data.length,
-      //     // };
-      //   })
-      //   .catch((e) => {
-      //     console.log(e);
-      //   })
-      //   .finally(() => {
-      //     this.dataLoading = false;
-      //   });
     },
     getContainer() {
       return document.querySelector('.tdesign-starter-layout');
@@ -259,29 +206,19 @@ export default {
       console.log('统一Change', changeParams, triggerAndData);
     },
     rehandleClickOp({ text, row }) {
-      this.$router.push({ path: '/user/formEdit', query: { data: row, operate: '修改' } });
+      this.$router.push({ path: '/hospital/formEdit', query: { data: row, operate: '修改' } });
     },
     handleClickDelete(row) {
-      this.deleteIdx = row.row.user_id;
+      this.deleteIdx = row.row.hospital_id;
       this.confirmVisible = true;
     },
     onConfirmDelete() {
-      this.$request
-        .delete('/user/' + this.deleteIdx)
-        .then((res) => {
-          this.initData();
-        })
-        .catch((e) => {
-          console.log(e);
-        })
-        .finally(() => {
-          this.dataLoading = false;
-        });
-
-      this.pagination.total = this.data.length;
-      this.confirmVisible = false;
-      this.$message.success('删除成功');
-      // this.resetIdx();
+      deleteHospital(this.deleteIdx).then((res) => {
+        this.pagination.total = this.data.length;
+        this.initData();
+        this.confirmVisible = false;
+        this.$message.success('删除成功');
+      });
     },
     onCancel() {
       this.resetIdx();
@@ -305,7 +242,7 @@ export default {
         });
     },
     addUser() {
-      this.$router.push('/user/formEdit');
+      this.$router.push('/schedule/formEdit');
     },
 
     /**
@@ -336,13 +273,15 @@ export default {
      * 确定选择权限（修改用户权限）
      */
     async confirm() {
-      const res = await this.$request.patch('/permission/' + this.selectUserId, {
-        list: this.targetValue,
-      });
-      if (res == '修改成功') {
-        this.$message.success('修改成功');
-        this.visible = false;
-      }
+      console.log('=====');
+
+      //   const res = await this.$request.patch('/permission/' + this.selectUserId, {
+      //     list: this.targetValue,
+      //   });
+      //   if (res == '修改成功') {
+      //     this.$message.success('修改成功');
+      //     this.visible = false;
+      //   }
     },
   },
 };

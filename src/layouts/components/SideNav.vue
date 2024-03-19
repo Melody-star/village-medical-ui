@@ -124,7 +124,7 @@ export default Vue.extend({
       if (this.collapsed) {
         return Logo;
       }
-      return LogoFull;
+      // return LogoFull;
     },
   },
   mounted() {

@@ -13,22 +13,22 @@
         <t-col :span="10">
           <t-row :gutter="[16, 24]">
             <t-col>
-              <t-form-item label="用户ID" name="status">
+              <t-form-item label="科室编号" name="status">
                 <t-input
                   v-model="formData.userId"
                   class="form-item-content`"
                   type="search"
-                  placeholder="请输入用户ID"
+                  placeholder="请输入科室编号"
                 />
               </t-form-item>
             </t-col>
             <t-col>
-              <t-form-item label="用户名" name="username">
+              <t-form-item label="科室名称" name="username">
                 <t-input
                   v-model="formData.username"
                   class="form-item-content"
                   type="search"
-                  placeholder="请输入用户名"
+                  placeholder="请输入科室名称"
                   :style="{ minWidth: '134px' }"
                 />
               </t-form-item>
@@ -67,14 +67,14 @@
           <a
             class="t-button-link"
             @click="handleClickPower(slotProps)"
-           
+            v-if="roles.includes('Permission') || roles.includes('ALL_ROUTERS')"
             >权限</a
           >
           <a class="t-button-link" @click="handleClickDelete(slotProps)">删除</a>
         </template>
       </t-table>
       <t-dialog
-        header="确认删除当前所选项？"
+        header="确认删除当前所选合同？"
         :body="confirmBody"
         :visible.sync="confirmVisible"
         @confirm="onConfirmDelete"
@@ -92,7 +92,7 @@
 <script>
 import { prefix } from '@/config/global';
 import Trend from '@/components/trend/index.vue';
-import { getUserInfoByType } from '@/api/home';
+import { getDepartment } from '@/api/home';
 
 import {
   CONTRACT_STATUS,
@@ -125,49 +125,24 @@ export default {
       value: 'first',
       columns: [
         {
-          title: '用户ID',
+          title: '科室编号',
           fixed: 'left',
           width: 150,
           align: 'center',
           ellipsis: true,
-          colKey: 'user_id',
+          colKey: 'primary_department_id',
         },
         {
-          title: '账号',
+          title: '所属医院',
           width: 200,
           ellipsis: true,
-          colKey: 'account',
+          colKey: 'hospital.hospital_name',
         },
         {
-          title: '用户类型',
+          title: '名称',
           width: 200,
           ellipsis: true,
-          colKey: 'user_type',
-        },
-        {
-          title: '头像',
-          width: 200,
-          ellipsis: true,
-          colKey: 'avatar',
-        },
-        {
-          title: '用户名',
-          width: 200,
-          ellipsis: true,
-          colKey: 'username',
-        },
-        {
-          title: 'openid',
-          width: 200,
-          ellipsis: true,
-          colKey: 'openid',
-        },
-        {
-          align: 'left',
-          fixed: 'right',
-          width: 200,
-          colKey: 'op',
-          title: '操作',
+          colKey: 'department_name',
         },
       ],
       rowKey: 'index',
@@ -206,13 +181,11 @@ export default {
   mounted() {
     this.dataLoading = true;
     this.initData();
-    // this.roles = this.$store.getters['user/roles'];
+    this.roles = this.$store.getters['user/roles'];
   },
   methods: {
     initData() {
-      getUserInfoByType({
-        type: 4,
-      })
+      getDepartment()
         .then((res) => {
           this.data = res;
           this.pagination = {
@@ -227,14 +200,11 @@ export default {
       // this.$request
       //   .get('/user/getUserInfoByType?type=4')
       //   .then((res) => {
-
-      //     console.log(res);
-
-      //     // this.data = res;
-      //     // this.pagination = {
-      //     //   ...this.pagination,
-      //     //   total: this.data.length,
-      //     // };
+      //     this.data = res;
+      //     this.pagination = {
+      //       ...this.pagination,
+      //       total: this.data.length,
+      //     };
       //   })
       //   .catch((e) => {
       //     console.log(e);

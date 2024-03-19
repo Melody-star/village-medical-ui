@@ -48,11 +48,12 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { login } from '@/api/home';
 import QrcodeVue from 'qrcode.vue';
 import { UserIcon, LockOnIcon, BrowseOffIcon, BrowseIcon, RefreshIcon } from 'tdesign-icons-vue';
 import { onMounted } from 'tdesign-vue/es/tree/adapt';
 import { getSelftItemList } from '@/pages/dashboard/base';
-import store from '@/store';
+import store from '@/store/index';
 import { USER_INFO_LIST } from '@/service/service-user';
 
 const INITIAL_DATA = {
@@ -107,9 +108,13 @@ export default Vue.extend({
       this.type = val;
       this.$refs.form.reset();
     },
+
+    /**
+     * 点击登录按钮
+     */
     async onSubmit({ validateResult }) {
       if (validateResult === true) {
-        await this.$store.dispatch('user/login', this.formData);
+        const res = await login(this.formData);
 
         // 记住密码
         localStorage.setItem('isSaveAccount', this.isSaveAccount);
@@ -119,7 +124,8 @@ export default Vue.extend({
         }
 
         this.$message.success('登录成功');
-        this.$router.replace('/').catch(() => '');
+        this.$store.commit('user/setToken', res.authorization);
+        this.$router.replace('/dashboard/base').catch(() => '');
       }
     },
     handleCounter() {

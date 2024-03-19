@@ -1,6 +1,7 @@
 import { TOKEN_NAME } from '@/config/global';
 import proxy from '@/config/host';
-import axios from 'axios';
+import _this from '@/main.jsx';
+import instance from '@/utils/request';
 
 const env = import.meta.env.MODE || 'development';
 
@@ -37,21 +38,25 @@ const getters = {
 };
 
 const actions = {
-  async login({ commit }, userInfo) {
-    const { account, password } = userInfo;
-    const res = await axios.post(API_HOST + '/auth/login', {
-      username: account,
-      password,
-    });
-    if (res.status === 201) {
-      commit('setToken', res.data.data.authorization);
-    } else {
-      throw res;
-    }
-  },
+  // async login({ commit }, userInfo) {
+  //   const { account, password } = userInfo;
+  //   const res = await instance.post(API_HOST + '/auth/login', {
+  //     account: account,
+  //     password,
+  //   });
+  //   if (res.status === 201) {
+  //     commit('setToken', res.data.data.authorization);
+  //   } else {
+  //     throw res;
+  //   }
+  // },
   async getUserInfo({ commit, state }) {
-    const res = await axios.get(API_HOST + '/auth/findUserByToken?token=' + state.token);
-    commit('setUserInfo', res.data.data);
+    const res = await instance.get(API_HOST + '/auth/findUserByToken?token=' + state.token);
+
+    console.log(res);
+    
+
+    commit('setUserInfo', res);
   },
   async logout({ commit }) {
     commit('removeToken');

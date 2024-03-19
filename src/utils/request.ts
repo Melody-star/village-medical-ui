@@ -1,20 +1,21 @@
 import axios from 'axios';
 import proxy from '../config/host';
 import { MessagePlugin } from 'tdesign-vue';
+import router from '@/router/index'
 
 const env = import.meta.env.MODE || 'development';
 
 const API_HOST = env === 'mock' ? '/' : proxy[env].API; // 如果是mock模式 就不配置host 会走本地Mock拦截
 
-const CODE = {
-  LOGIN_TIMEOUT: 1000,
-  REQUEST_SUCCESS: 200,
-  REQUEST_FOBID: 1001,
-};
+// const CODE = {
+//   LOGIN_TIMEOUT: 1000,
+//   REQUEST_SUCCESS: 200,
+//   REQUEST_FOBID: 1001,
+// };
 
 const instance = axios.create({
   baseURL: API_HOST,
-  timeout: 1000,
+  timeout: 5000,
   withCredentials: true,
 });
 
@@ -23,20 +24,32 @@ const instance = axios.create({
 // axios的retry ts类型有问题
 instance.interceptors.retry = 3;
 
-instance.interceptors.request.use((config) => config);
+instance.interceptors.request.use(
+  function (config) {
+    const authorization = localStorage.getItem('token');
+    if (authorization) {
+      config.headers.Authorization = authorization;
+    }
+    return config;
+  },
+  function (error) {    
+    return Promise.reject(error);
+  },
+);
 
 instance.interceptors.response.use(
-  (response) => {
+  (response) => {    
     if (response.status === 200 || 201) {
       return response.data.data;
     }
   },
-  (err) => {
+  (err) => {    
     let message = '';
-    let status = err.response.status;
+    let status = err.response.status;    
     switch (status) {
       case 401:
         message = 'Token已过期';
+        router.push('login')
         break;
       case 403:
         message = '权限不足';
@@ -54,7 +67,6 @@ instance.interceptors.response.use(
         message = '网络错误';
         break;
     }
-    // $message('warning', message);
     MessagePlugin.error(message);
     return Promise.reject(err);
   },

@@ -1,7 +1,7 @@
 <template>
   <t-row :gutter="[16, 16]">
-    <t-col :xs="12" :xl="9">
-      <t-card title="统计数据" subtitle="(万元)" class="dashboard-chart-card" :bordered="false">
+    <t-col :xs="12" :xl="12">
+      <t-card title="挂号人数" subtitle="(人)" class="dashboard-chart-card" :bordered="false">
         <template #actions>
           <div class="dashboard-chart-title-container">
             <t-date-range-picker
@@ -16,19 +16,19 @@
         <div
           id="monitorContainer"
           ref="monitorContainer"
-          :style="{ width: '100%', height: `${resizeTime * 326}px` }"
+          :style="{ width: '85%', height: `${resizeTime * 326}px` }"
         ></div>
       </t-card>
     </t-col>
-    <t-col :xs="12" :xl="3">
-      <t-card title="销售渠道" :subtitle="currentMonth" class="dashboard-chart-card" :bordered="false">
+    <!-- <t-col :xs="12" :xl="3">
+      <t-card title="" :subtitle="currentMonth" class="dashboard-chart-card" :bordered="false">
         <div
           id="countContainer"
           ref="countContainer"
           :style="{ width: `${resizeTime * 326}px`, height: `${resizeTime * 326}px`, margin: '0 auto' }"
         ></div>
       </t-card>
-    </t-col>
+    </t-col> -->
   </t-row>
 </template>
 <script>

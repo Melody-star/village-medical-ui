@@ -1,7 +1,7 @@
 export default {
   development: {
     // 开发环境接口请求
-    API: 'http://localhost:3000',
+    API: 'http://127.0.0.1:3000',
     // 开发环境 cdn 路径
     CDN: '',
   },
